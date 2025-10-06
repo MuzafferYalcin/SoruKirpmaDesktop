@@ -1,0 +1,295 @@
+/* ======================================================= */
+/* TEMEL YAPI VE ESNEK LAYOUT İYİLEŞTİRMELERİ            */
+/* ======================================================= */
+html, body {
+    height: 100%; /* Sayfanın tüm yüksekliği kaplamasını sağlar */
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #eef5ea;
+    color: #333;
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    padding: 20px; /* Pencere kenarlarında nefes alma payı */
+    box-sizing: border-box;
+    /* Dikey esnek bir layout oluşturuyoruz */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ana Konteyner */
+.container {
+    background-color: #f6fbf4;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #d8e8d5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    
+    /* Dikeyde esnemesi için eklendi */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Body'deki boş alanı doldurmasını sağlar */
+    min-height: 0; /* Flexbox'ın küçülme sorunlarını engeller */
+}
+
+/* ======================================================= */
+/* FORM ELEMANLARI                                       */
+/* ======================================================= */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+/* Textarea'yı içeren form-group'un dikeyde esnemesini sağlıyoruz */
+.form-group.is-flexible {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Kendine ayrılan dikey boşluğu doldurur */
+    min-height: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #4a5568;
+}
+
+input[type="text"],
+input[type="number"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d8e8d5;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #a0d894;
+    box-shadow: 0 0 0 3px rgba(160, 216, 148, 0.3);
+}
+
+textarea {
+    resize: vertical;
+    /* Eklendi: İçinde bulunduğu esnek alana tamamen yayılmasını sağlar */
+    flex-grow: 1; 
+}
+
+/* Alt Kısım (Footer) */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap; /* Sığmazsa alt satıra geç */
+    gap: 15px; /* Alt satıra geçtiğinde boşluk bırak */
+}
+
+.form-group-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.form-group-inline label { margin-bottom: 0; }
+.form-group-inline input[type="number"] { width: 80px; }
+
+/* Buton Grubu */
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap; /* Butonlar da sığmazsa alt satıra geçsin */
+}
+
+/* Buton Stilleri (Değişiklik yok) */
+button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid #c9dcc5;
+    background-color: #f0f5ee;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    color: #333;
+}
+button:hover:not(:disabled) { background-color: #e6f0e3; border-color: #b9d1b6; }
+button:disabled, button.disabled-light { cursor: not-allowed; opacity: 0.6; }
+button.disabled-light { background-color: #f0f5ee; color: #aaa; }
+#btn-deepcut { background-color: #e1f0dd; border-color: #c9dcc5; }
+#btn-deepcut:hover { background-color: #d1e5cc; }
+
+/* ======================================================= */
+/* ORİJİNAL TASARIMA SADIK RESPONSIVE KODLARI            */
+/* ======================================================= */
+
+@media (max-width: 650px) {
+    /* Footer'daki "Kaç Adet Resim" ve "Buton Grubu" sığmadığında alt satıra geçer.
+       Buton grubunun yeni satırda sağa hizalı kalması için bu ayarı yapıyoruz. */
+    .button-group {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Tüm ekranı kaplayan yarı saydam katman */
+#loader-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 15px; /* Ana container ile aynı yuvarlaklık */
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    color: #333;
+    font-size: 1.1em;
+}
+
+/* Belirsiz ilerleme çubuğu */
+.progress-bar {
+    width: 80%;
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* İlerleme çubuğunun hareketli kısmı */
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 40%;
+    background-color: #a0d894; /* Ana rengimizle uyumlu */
+    border-radius: 4px;
+    animation: indeterminate-progress 1.5s infinite ease-in-out;
+}
+
+/* Animasyon tanımı */
+@keyframes indeterminate-progress {
+    0% {
+        left: -40%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+
+/* ======================================================= */
+/* YENİ EKLENEN LAYOUT STİLLERİ                            */
+/* ======================================================= */
+
+.input-row {
+    display: flex;
+    gap: 15px; /* Elemanlar arası boşluk */
+    align-items: flex-end; /* Buton ve inputları alttan hizala */
+    margin-bottom: 20px;
+}
+
+.input-row .form-group {
+    margin-bottom: 0; /* input-row margin verdiği için bunu sıfırla */
+}
+
+.flex-grow {
+    flex-grow: 1; /* Genişleyebilen alan */
+}
+
+input[type="date"] {
+    padding: 10.5px; /* Diğer inputlarla yüksekliği eşitlemek için */
+}
+
+.inline-button {
+    height: 42px; /* Input'larla aynı yükseklik */
+    margin-bottom: 0;
+    white-space: nowrap; /* Buton yazısı alt satıra inmesin */
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #c9dcc5;
+    background-color: #f0f5ee;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.inline-button:hover {
+    background-color: #e6f0e3;
+}
+
+/* ======================================================= */
+/* FLATICKR (MODERN TARİH SEÇİCİ) STİLLERİ                */
+/* ======================================================= */
+
+/* Flatpickr input alanlarının da diğerleri gibi görünmesini sağla */
+.flatpickr-input {
+    background-color: #ffffff !important;
+    border: 1px solid #d8e8d5 !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    padding: 12px !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    width: 170px !important; /* Genişliği ayarlayabilirsin */
+    box-sizing: border-box;
+}
+
+/* Takvimin kendisi */
+.flatpickr-calendar {
+    background-color: #f6fbf4;
+    border: 1px solid #d8e8d5;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.flatpickr-months .flatpickr-month {
+    color: #4a5568;
+    fill: #4a5568;
+}
+
+.flatpickr-weekday {
+    color: #4a5568;
+    font-weight: 500;
+}
+
+/* Seçili gün */
+.flatpickr-day.selected {
+    background: #a0d894;
+    border-color: #a0d894;
+    color: #fff;
+}
+
+/* Bugün */
+.flatpickr-day.today {
+    border-color: #a0d894;
+}
+
+.flatpickr-day:hover {
+    background: #eef5ea;
+}
+
+/* Ok ikonları */
+.flatpickr-arrow {
+    fill: #4a5568 !important;
+}
+.flatpickr-arrow:hover {
+    fill: #333 !important;
+}

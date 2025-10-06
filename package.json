@@ -1,0 +1,18 @@
+{
+  "name": "soru-temizleme-app",
+  "version": "1.0.0",
+  "description": "Soru Temizleme Desktop Uygulaması",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^25.0.0"
+  },
+  "dependencies": {
+    "flatpickr": "^4.6.13"
+  }
+}

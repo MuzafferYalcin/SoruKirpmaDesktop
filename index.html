@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Soru Temizleme Desktop App</title>
+    <link rel="stylesheet" href="node_modules/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="input-row">
+            <div class="form-group flex-grow">
+                <label for="book-ids">Kitap ID'leri (virgülle ayırın)</label>
+                <input type="text" id="book-ids" name="book-ids">
+            </div>
+            <div class="form-group">
+                <label for="start-date">Başlangıç Tarihi</label>
+                <input type="text" id="start-date" name="start-date" placeholder="gg.aa.yyyy">
+            </div>
+            <div class="form-group">
+                <label for="end-date">Bitiş Tarihi</label>
+                <input type="text" id="end-date" name="end-date" placeholder="gg.aa.yyyy">
+            </div>
+        </div>
+
+        <div class="input-row">
+            <div class="form-group flex-grow">
+                <label for="parent-ids">Üst Kurum ID'leri (opsiyonel)</label>
+                <input type="text" id="parent-ids" name="parent-ids">
+            </div>
+            <button id="btn-get-book-ids" class="inline-button">Kitap ID'leri Getir</button>
+        </div>
+
+        <div class="form-group is-flexible">
+            <textarea id="results" name="results" placeholder="İşlem sonuçları burada görüntülenecek..." readonly></textarea>
+        </div>
+
+        <div class="footer">
+            <div class="form-group-inline">
+                <label for="image-count">Kaç Adet Resim</label>
+                <input type="number" id="image-count" name="image-count" value="1" min="1">
+            </div>
+            <div class="button-group">
+                <button id="btn-random">Random</button>
+                <button id="btn-test">Test Et</button>
+                <button id="btn-deepcut">Deep Cut Çalıştır</button>
+                <button id="btn-preview">Önizleme</button>
+            </div>
+        </div>
+        
+        <div id="loader-overlay" class="hidden">
+            <div class="progress-bar"></div>
+            <p>İşlem uzun sürebilir, lütfen bekleyin...</p>
+        </div>
+    </div>
+
+    <script src="./renderer.js"></script>
+</body>
+</html>

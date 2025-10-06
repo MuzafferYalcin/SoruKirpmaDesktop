@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Önizleme</title>
+    <link rel="stylesheet" href="preview-style.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="panel panel-left">
+            <h3 class="panel-title">Kitap Listesi</h3>
+            <div id="book-list" class="book-list-container">
+                </div>
+        </div>
+
+        <div class="panel panel-right">
+            <div class="navigation-bar">
+                <button id="prev-btn" disabled>◄ Önceki Soru</button>
+                <div id="question-info" class="question-info">Kitap seçin</div>
+                <button id="next-btn" disabled>Sonraki Soru ►</button>
+            </div>
+            <div class="image-viewer-container">
+                <div class="image-box">
+                    <h4>Orijinal Resim</h4>
+                    <div class="image-wrapper">
+                        <img id="original-image" src="" alt="Resim yükleniyor...">
+                    </div>
+                </div>
+                <div class="image-box">
+                    <h4>İşlenmiş Resim</h4>
+                    <div class="image-wrapper">
+                        <img id="processed-image" src="" alt="Resim yükleniyor...">
+                    </div>
+                    <div class="image-actions">
+                        <button id="report-error-btn" class="error-report-btn" disabled>
+                            ⚠️ Hata Bildir
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onay Modalı -->
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Hata Bildirimi</h3>
+                <span class="close-btn" id="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Bu işlenmiş resimde hata olduğunu bildirmek istediğinizden emin misiniz?</p>
+                <p><strong>Bu işlem geri alınamaz.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-cancel" class="btn-cancel">İptal</button>
+                <button id="modal-confirm" class="btn-confirm">Evet, Hata Bildir</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./preview.js"></script>
+</body>
+</html>

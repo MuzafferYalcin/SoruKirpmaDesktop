@@ -1,0 +1,77 @@
+body, html {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: #f6fbf4;
+    color: #333;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #d8e8d5;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+h3 {
+    margin: 0;
+    font-weight: 500;
+}
+
+.select-all-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.book-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid #d8e8d5;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fff;
+}
+
+.book-item {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.book-item label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer {
+    padding-top: 15px;
+    text-align: right;
+}
+
+button {
+    padding: 10px 25px;
+    border-radius: 8px;
+    border: 1px solid #c9dcc5;
+    background-color: #e1f0dd;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #d1e5cc;
+}
