@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs'); // Node.js'in dosya sistemi modülünü dahil et
 
@@ -120,5 +120,17 @@ ipcMain.on('selection-complete', (event, selectedIds) => {
     const selectorWindow = BrowserWindow.fromWebContents(event.sender);
     if (selectorWindow) {
         selectorWindow.close();
+    }
+});
+
+// Klasör açma talebini dinle (YENİ)
+ipcMain.handle('open-folder', async (event, folderPath) => {
+    try {
+        // Windows UNC path'ini shell.openPath ile aç
+        await shell.openPath(folderPath);
+        return { success: true };
+    } catch (error) {
+        console.error('Klasör açılırken hata:', error);
+        throw new Error(`Klasör açılamadı: ${error.message}`);
     }
 });

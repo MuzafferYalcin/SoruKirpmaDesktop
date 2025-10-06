@@ -11,11 +11,13 @@ const nextBtn = document.getElementById('next-btn');
 const questionInfo = document.getElementById('question-info');
 const originalImage = document.getElementById('original-image');
 const processedImage = document.getElementById('processed-image');
+const filePathElement = document.getElementById('file-path');
 const reportErrorBtn = document.getElementById('report-error-btn');
 const confirmationModal = document.getElementById('confirmation-modal');
 const modalClose = document.getElementById('modal-close');
 const modalCancel = document.getElementById('modal-cancel');
 const modalConfirm = document.getElementById('modal-confirm');
+const notificationContainer = document.getElementById('notification-container');
 
 // Durum Değişkenleri
 let allKitapIds = [];
@@ -72,7 +74,107 @@ confirmationModal.addEventListener('click', (e) => {
     }
 });
 
+// Klavye tuşları ile navigasyon
+document.addEventListener('keydown', (e) => {
+    // Modal açıkken klavye navigasyonunu devre dışı bırak
+    if (confirmationModal.style.display === 'block') {
+        return;
+    }
+    
+    // Sol ok tuşu - önceki soru
+    if (e.key === 'ArrowLeft' && !prevBtn.disabled) {
+        e.preventDefault();
+        fetchQuestion(currentQuestionIndex - 1);
+    }
+    
+    // Sağ ok tuşu - sonraki soru
+    if (e.key === 'ArrowRight' && !nextBtn.disabled) {
+        e.preventDefault();
+        fetchQuestion(currentQuestionIndex + 1);
+    }
+});
+
+// Dosya path'ine tıklandığında Windows Explorer'da klasörü aç
+filePathElement.addEventListener('click', () => {
+    const pathText = filePathElement.textContent;
+    if (pathText && pathText !== 'Path bulunamadı' && pathText !== '-') {
+        // Electron'da shell.openPath kullanarak Windows Explorer'da klasörü aç
+        ipcRenderer.invoke('open-folder', pathText).catch(error => {
+            console.error('Klasör açılırken hata:', error);
+            showNotification('Klasör açılırken bir hata oluştu: ' + error.message, 'error');
+        });
+    }
+});
+
 // === FONKSİYONLAR ===
+
+// Notification gösterme fonksiyonu
+function showNotification(message, type = 'success', duration = 4000) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${icons[type] || icons.info}</span>
+            <span class="notification-text">${message}</span>
+        </div>
+        <button class="notification-close" onclick="closeNotification(this)">&times;</button>
+    `;
+    
+    notificationContainer.appendChild(notification);
+    
+    // Otomatik kapanma
+    if (duration > 0) {
+        setTimeout(() => {
+            closeNotification(notification.querySelector('.notification-close'));
+        }, duration);
+    }
+}
+
+// Notification kapatma fonksiyonu
+function closeNotification(closeBtn) {
+    const notification = closeBtn.closest('.notification');
+    if (notification) {
+        notification.classList.add('slide-out');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }
+}
+
+// Linux/network path'ini Windows UNC path'ine çevirir
+function convertToWindowsPath(linuxPath) {
+    if (!linuxPath) return '';
+    
+    // //bcs01.impark.local/Storage2/... formatını \\bcs01.impark.local\Storage2\... formatına çevir
+    let windowsPath = linuxPath.replace(/\//g, '\\');
+    
+    // Eğer \\ ile başlamıyorsa, başına \\ ekle (UNC path için)
+    if (!windowsPath.startsWith('\\\\')) {
+        windowsPath = '\\' + windowsPath;
+    }
+    
+    return windowsPath;
+}
+
+// Dosya path'inden klasör path'ini çıkarır
+function getDirectoryPath(filePath) {
+    if (!filePath) return '';
+    
+    const lastSlashIndex = filePath.lastIndexOf('\\');
+    if (lastSlashIndex === -1) return filePath;
+    
+    return filePath.substring(0, lastSlashIndex);
+}
 
 // Soldaki kitap listesini HTML olarak oluşturur
 function renderBookList(kitapIds) {
@@ -150,6 +252,20 @@ function updateUI(data) {
     currentBeforePath = data.metadata.original_path1;
     currentAfterPath = data.metadata.processed_path1;
 
+    // Dosya path'ini Windows formatında göster
+    const windowsPath = convertToWindowsPath(data.metadata.processed_path1);
+    const directoryPath = getDirectoryPath(windowsPath);
+    
+    if (directoryPath) {
+        filePathElement.textContent = directoryPath;
+        filePathElement.style.cursor = 'pointer';
+        filePathElement.title = 'Klasöre gitmek için tıklayın: ' + directoryPath;
+    } else {
+        filePathElement.textContent = 'Path bulunamadı';
+        filePathElement.style.cursor = 'default';
+        filePathElement.title = '';
+    }
+
     questionInfo.textContent = `Soru: ${currentQuestionIndex + 1} / ${totalQuestions} (Kitap ID: ${data.metadata.kitap_id})`;
 
     prevBtn.disabled = !data.has_previous;
@@ -185,7 +301,7 @@ function closeModal() {
 
 async function reportError() {
     if (!currentBeforePath || !currentAfterPath) {
-        alert('Hata: Resim bilgileri bulunamadı.');
+        showNotification('Hata: Resim bilgileri bulunamadı.', 'error');
         return;
     }
 
@@ -206,7 +322,7 @@ async function reportError() {
         const data = await response.json();
 
         if (response.ok && data.status === 'ok') {
-            alert('Hata bildirimi başarıyla gönderildi.');
+            showNotification('Hata bildirimi başarıyla gönderildi.', 'success');
             // Butonu deaktif et (tekrar bildirim yapılmasın)
             reportErrorBtn.disabled = true;
             reportErrorBtn.textContent = '✓ Bildirildi';
@@ -216,6 +332,6 @@ async function reportError() {
             throw new Error(data.message || 'Hata bildirimi gönderilemedi.');
         }
     } catch (error) {
-        alert(`Hata bildirimi sırasında bir sorun oluştu: ${error.message}`);
+        showNotification(`Hata bildirimi sırasında bir sorun oluştu: ${error.message}`, 'error');
     }
 }
