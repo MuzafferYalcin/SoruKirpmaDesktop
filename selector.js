@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron');
 
 // --- Konfigürasyon ---
-const API_BASE_URL = 'http://bcaicpudev.impark.local:1071'; // API adresini kendi adresinle değiştir
+const API_BASE_URL = 'https://sorukirp.sorucoz.tv/'; // API adresini kendi adresinle değiştir
 // ---
 
 const bookListContainer = document.getElementById('book-list-container');

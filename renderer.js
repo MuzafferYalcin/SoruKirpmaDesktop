@@ -3,7 +3,7 @@ const flatpickr = require('flatpickr');
 const { Turkish } = require("flatpickr/dist/l10n/tr.js");
 
 // --- Konfigürasyon ---
-const API_BASE_URL = 'http://bcaicpudev.impark.local:1071';
+const API_BASE_URL = 'https://sorukirp.sorucoz.tv/';
 // ---
 
 // HTML Elemanları
