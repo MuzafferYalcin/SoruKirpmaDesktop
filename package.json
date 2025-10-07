@@ -4,13 +4,28 @@
   "description": "Soru Temizleme Desktop Uygulaması",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.impark.sorukirpma",
+    "productName": "Soru Kirpma Desktop",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/app-icon.ico"
+    }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^25.0.0"
+    "electron": "^25.0.0",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "flatpickr": "^4.6.13"
