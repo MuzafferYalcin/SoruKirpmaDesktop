@@ -8,6 +8,112 @@ const bookListContainer = document.getElementById('book-list-container');
 const selectAllCheckbox = document.getElementById('select-all');
 const confirmBtn = document.getElementById('confirm-selection');
 
+// Kullanıcı dostu hata mesajı oluşturma fonksiyonu
+function getUserFriendlyErrorMessage(error) {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('failed to fetch') || message.includes('network error') || message.includes('fetch')) {
+        return 'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.';
+    }
+    
+    if (message.includes('timeout') || message.includes('timed out')) {
+        return 'İşlem zaman aşımına uğradı. Sunucu yanıt vermiyor, lütfen tekrar deneyin.';
+    }
+    
+    if (message.includes('404') || message.includes('not found')) {
+        return 'İstenen kaynak bulunamadı. API adresi değişmiş olabilir.';
+    }
+    
+    if (message.includes('500') || message.includes('internal server error')) {
+        return 'Sunucuda bir hata oluştu. Lütfen sistem yöneticisine başvurun.';
+    }
+    
+    if (message.includes('403') || message.includes('forbidden')) {
+        return 'Bu işlem için yetkiniz bulunmuyor.';
+    }
+    
+    if (message.includes('401') || message.includes('unauthorized')) {
+        return 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
+    }
+    
+    // Eğer yukarıdaki durumlardan hiçbiri değilse, orijinal mesajı döndür
+    return error.message;
+}
+
+// Notification gösterme fonksiyonu
+function showNotification(message, type = 'error', duration = 5000) {
+    // Eğer notification container yoksa oluştur
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        `;
+        document.body.appendChild(container);
+    }
+
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+    
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${icons[type] || icons.error}</span>
+            <span class="notification-text">${message}</span>
+        </div>
+        <button class="notification-close" onclick="closeNotification(this)">&times;</button>
+    `;
+    
+    // Notification stilleri
+    notification.style.cssText = `
+        background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#FF9800' : '#f44336'};
+        color: white;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        animation: slideIn 0.3s ease-out;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+    `;
+    
+    container.appendChild(notification);
+    
+    // Otomatik kapanma
+    if (duration > 0) {
+        setTimeout(() => {
+            closeNotification(notification.querySelector('.notification-close'));
+        }, duration);
+    }
+}
+
+// Notification kapatma fonksiyonu
+function closeNotification(closeBtn) {
+    const notification = closeBtn.closest('.notification');
+    if (notification) {
+        notification.style.animation = 'slideOut 0.3s ease-in';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }
+}
+
 // 1. Adım: Ana süreçten gelen filtreleri dinle
 ipcRenderer.on('filters-data', (event, filters) => {
     fetchBookIds(filters);
@@ -26,14 +132,19 @@ async function fetchBookIds(filters) {
         const response = await fetch(`${API_BASE_URL}/api/kitaplarByKurum?${params.toString()}`);
         
         if (!response.ok) {
-            throw new Error('API\'den kitap listesi alınamadı.');
+            const errorMsg = `API'den kitap listesi alınamadı. (HTTP ${response.status})`;
+            showNotification(errorMsg, 'error');
+            throw new Error(errorMsg);
         }
 
         const data = await response.json(); // Örnek yanıt: { "kitap_idleri": [101, 102, 103] }
         renderBookList(data.kitap_idleri);
 
     } catch (error) {
-        bookListContainer.innerHTML = `<p style="color: red;">Hata: ${error.message}</p>`;
+        const friendlyErrorMsg = getUserFriendlyErrorMessage(error);
+        const errorMsg = `Hata: ${friendlyErrorMsg}`;
+        bookListContainer.innerHTML = `<p style="color: red;">${errorMsg}</p>`;
+        showNotification(friendlyErrorMsg, 'error');
     }
 }
 
@@ -76,4 +187,46 @@ confirmBtn.addEventListener('click', () => {
 
     // Ana sürece veriyi gönder, o da ana pencereye iletecek
     ipcRenderer.send('selection-complete', selectedIds);
+});
+
+// CSS animasyonlarını ekle
+document.addEventListener('DOMContentLoaded', () => {
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        .notification-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .notification-icon {
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            margin-left: 10px;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .notification-close:hover {
+            opacity: 0.7;
+        }
+    `;
+    document.head.appendChild(style);
 });

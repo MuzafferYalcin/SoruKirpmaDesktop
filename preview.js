@@ -108,6 +108,38 @@ filePathElement.addEventListener('click', () => {
 
 // === FONKSİYONLAR ===
 
+// Kullanıcı dostu hata mesajı oluşturma fonksiyonu
+function getUserFriendlyErrorMessage(error) {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('failed to fetch') || message.includes('network error') || message.includes('fetch')) {
+        return 'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.';
+    }
+    
+    if (message.includes('timeout') || message.includes('timed out')) {
+        return 'İşlem zaman aşımına uğradı. Sunucu yanıt vermiyor, lütfen tekrar deneyin.';
+    }
+    
+    if (message.includes('404') || message.includes('not found')) {
+        return 'İstenen kaynak bulunamadı. API adresi değişmiş olabilir.';
+    }
+    
+    if (message.includes('500') || message.includes('internal server error')) {
+        return 'Sunucuda bir hata oluştu. Lütfen sistem yöneticisine başvurun.';
+    }
+    
+    if (message.includes('403') || message.includes('forbidden')) {
+        return 'Bu işlem için yetkiniz bulunmuyor.';
+    }
+    
+    if (message.includes('401') || message.includes('unauthorized')) {
+        return 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
+    }
+    
+    // Eğer yukarıdaki durumlardan hiçbiri değilse, orijinal mesajı döndür
+    return error.message;
+}
+
 // Notification gösterme fonksiyonu
 function showNotification(message, type = 'success', duration = 4000) {
     const notification = document.createElement('div');
@@ -233,10 +265,15 @@ async function fetchQuestion(index) {
         if (response.ok && data.status === 'ok') {
             updateUI(data);
         } else {
-            throw new Error(data.message || 'Soru verisi alınamadı.');
+            const errorMsg = data.message || 'Soru verisi alınamadı.';
+            showNotification(errorMsg, 'error');
+            throw new Error(errorMsg);
         }
     } catch (error) {
-        questionInfo.textContent = `Hata: ${error.message}`;
+        const friendlyErrorMsg = getUserFriendlyErrorMessage(error);
+        const errorMsg = `Hata: ${friendlyErrorMsg}`;
+        questionInfo.textContent = errorMsg;
+        showNotification(friendlyErrorMsg, 'error');
     }
 }
 
@@ -332,6 +369,7 @@ async function reportError() {
             throw new Error(data.message || 'Hata bildirimi gönderilemedi.');
         }
     } catch (error) {
-        showNotification(`Hata bildirimi sırasında bir sorun oluştu: ${error.message}`, 'error');
+        const friendlyErrorMsg = getUserFriendlyErrorMessage(error);
+        showNotification(`Hata bildirimi sırasında bir sorun oluştu: ${friendlyErrorMsg}`, 'error');
     }
 }
